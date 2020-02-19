@@ -1,6 +1,6 @@
 {
   "name": "fido2020",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Fidonet2020 is a simple Twitter clone",
   "main": "index.js",
   "scripts": {
@@ -28,5 +28,6 @@
     "moment": "^2.24.0",
     "mysql2": "^2.1.0",
     "sequelize": "^5.21.4"
-  }
+  },
+  "devDependencies": {}
 }
