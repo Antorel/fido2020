@@ -19,6 +19,8 @@ Create an `.env` file with the following secrets and parameters.
 PORT=80                   # specify the server port
 SESSION_SECRET=           # specify the session secret to use with cookies
 
+ADMIN_PASS=
+
 # Database Parameters
 
 DB_NAME=fidonet2020_db      # specify the database name
