@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Fido2020</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
         <h1>FidoNet2020</h1>
         <ul class="user-toolbar">
-            <li><a href="/login">Login</a></li>
-            <li><a href="/register">Register</a></li>
-            <!-- TODO: add logout button -->
+            <% if (session.authorized) { %>
+                <li>@<%= session.login %></li>
+                <li>
+                    <form action="/logout" method="POST">
+                        <input type="submit" value="Logout">
+                    </form>
+                </li>
+            <% } else { %>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+            <% } %>
         </ul>
     </header>
     <main>
-        <!-- TODO: add message form -->
+        <!-- TODO: Add message form. -->
         <ul class="messages">
             <li class="message">No messages...</li>
         </ul>
