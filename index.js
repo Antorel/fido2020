@@ -3,6 +3,7 @@ const Sequelize = require('sequelize');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const server = express();
+const moment = require('moment');
 require('dotenv').config();
 
 const dbName = process.env.DB_NAME;
@@ -20,7 +21,7 @@ const sequelize = new Sequelize(
     'dialect': dbDialect
 });
 
-const User = sequelize.define('User', {
+const User = sequelize.define('user', {
     'login': {
         'type': Sequelize.STRING(64),
         'allowNull': false,
@@ -37,7 +38,7 @@ const User = sequelize.define('User', {
     }
 });
 
-const Message = sequelize.define('Message', {
+const Message = sequelize.define('message', {
     'content': {
         'type': Sequelize.STRING(140),
         'allowNull': false
@@ -57,9 +58,19 @@ server.use(session({
     'resave': false,
     'saveUninitialized': true
 }));
+server.locals.moment = moment;
 
 server.get('/', (request, response) => {
-    response.render('index', { 'session': request.session });
+    Message.findAll({
+        'include': [{
+            'model': User
+        }]
+    }).then(messages => {
+        response.render('index', { messages, 'session': request.session });
+    }).catch(error => {
+        console.error(error);
+        response.status(503).end('Service Unavailable');
+    });
 });
 
 server.get('/login', (request, response) => {
@@ -84,8 +95,8 @@ server.post('/login', (request, response) => {
     User.findOne({ 'where': { login } }).then(user => {
         if (user && bcrypt.compareSync(password, user.password)) {
             request.session.authorized = true;
-            request.session.userID  = user.id;
-            request.session.login  = user.login;
+            request.session.userID = user.id;
+            request.session.login = user.login;
             request.session.administrator = user.administrator;
             response.redirect('/');
         } else {
@@ -152,8 +163,8 @@ server.post('/register', (request, response) => {
                 'administrator': false
             }).then(user => {
                 request.session.authorized = true;
-                request.session.userID  = user.id;
-                request.session.login  = user.login;
+                request.session.userID = user.id;
+                request.session.login = user.login;
                 request.session.administrator = user.administrator;
                 response.redirect('/');
             });
@@ -164,7 +175,135 @@ server.post('/register', (request, response) => {
     });
 });
 
-(function loop(){
+server.post('/message/create', (request, response) => {
+    if (!request.session.authorized) {
+        response.status(401).end('Unauthorized');
+        return;
+    }
+
+    const content = request.body.content;
+    if (!content) {
+        request.session.error = "The message can't be empty.";
+        response.redirect('/');
+        return;
+    }
+
+    Message.create({
+        content, 'userId': request.session.userID
+    }).then(message => {
+        response.redirect('/');
+    }).catch(error => {
+        if (error.name === 'SequelizeDatabaseError') {
+            request.session.error = "Incorrect message.";
+            response.redirect('/');
+        } else {
+            console.error(error);
+            response.status(503).end('Service Unavailable');
+        }
+    });
+});
+
+server.post('/message/:id/delete', (request, response) => {
+    if (!request.session.authorized) {
+        response.status(401).end('Unauthorized');
+        return;
+    }
+
+    const id = request.params.id;
+    if (!id) {
+        request.session.error = "The message to be deleted was not specified.";
+        response.redirect('/');
+        return;
+    }
+
+    Message.findOne({ 'where': { id } }).then(message => {
+        if (!message) {
+            request.session.error = "No message to delete.";
+            response.redirect('/');
+        } else if (!(request.session.administrator || request.session.userID === message.userId)) {
+            response.status(401).end('Unauthorized');
+        } else {
+            return message.destroy().then(() => {
+                response.redirect('/');
+            });
+        }
+    }).catch(error => {
+        console.error(error);
+        response.status(503).end('Service Unavailable');
+    });
+});
+
+server.get('/message/:id/edit', (request, response) => {
+    if (!request.session.authorized) {
+        response.status(401).end('Unauthorized');
+        return;
+    }
+
+    const id = request.params.id;
+    if (!id) {
+        request.session.error = "The message to be edited was not specified.";
+        response.redirect('/');
+        return;
+    }
+
+    Message.findOne({ 'where': { id } }).then(message => {
+        if (!message) {
+            request.session.error = "No message to edit.";
+            response.redirect('/');
+        } else if (!(request.session.administrator || request.session.userID === message.userId)) {
+            response.status(401).end('Unauthorized');
+        } else {
+            response.render('message-edit', { message, 'session': request.session });
+        }
+    }).catch(error => {
+        console.error(error);
+        response.status(503).end('Service Unavailable');
+    });
+});
+
+server.post('/message/:id/edit', (request, response) => {
+    if (!request.session.authorized) {
+        response.status(401).end('Unauthorized');
+        return;
+    }
+
+    const id = request.params.id;
+    if (!id) {
+        request.session.error = "The message to be edited was not specified.";
+        response.redirect('/');
+        return;
+    }
+
+    const content = request.body.content;
+    if (!content) {
+        request.session.error = "The message can't be empty.";
+        response.redirect(`/message/${parseInt(id)}/edit`);
+        return;
+    }
+
+    Message.findOne({ 'where': { id } }).then(message => {
+        if (!message) {
+            request.session.error = "No message to edit.";
+            response.redirect('/');
+        } else if (!(request.session.administrator || request.session.userID === message.userId)) {
+            response.status(401).end('Unauthorized');
+        } else {
+            return message.update({ content }).then(() => {
+                response.redirect('/');
+            });
+        }
+    }).catch(error => {
+        if (error.name === 'SequelizeDatabaseError') {
+            request.session.error = "Incorrect message.";
+            response.redirect(`/message/${parseInt(id)}/edit`);
+        } else {
+            console.error(error);
+            response.status(503).end('Service Unavailable');
+        }
+    });
+});
+
+(function loop() {
     setTimeout(async () => {
         try {
             await sequelize.sync();
