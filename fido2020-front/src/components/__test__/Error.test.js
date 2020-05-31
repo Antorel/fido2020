@@ -29,4 +29,3 @@ it('clears error', () => {
 
     expect(cleared).toBe(true);
 });
-
