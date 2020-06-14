@@ -29,4 +29,7 @@ it('clears error', () => {
 
     expect(cleared).toBe(true);
 });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 482effbc564c8648d0a3c093ff43f7ba42e4c281

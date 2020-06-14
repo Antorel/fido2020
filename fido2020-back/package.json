@@ -16,12 +16,20 @@
     "clone",
     "express"
   ],
+<<<<<<< HEAD:fido2020-back/package.json
   "author": "Toksaitov Dmitrii Alexandrovich <dmitrii@toksaitov.com>",
+=======
+  "author": "Volf Evgenii <sis-admin@inbox.ru>",
+>>>>>>> 482effbc564c8648d0a3c093ff43f7ba42e4c281:fido2020-back/package.json
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/toksaitov/fido2020/issues"
   },
+<<<<<<< HEAD:fido2020-back/package.json
   "homepage": "https://github.com/toksaitov/fido2020#readme",
+=======
+  "homepage": "https://github.com/Antorel/fido2020#readme",
+>>>>>>> 482effbc564c8648d0a3c093ff43f7ba42e4c281:fido2020-back/package.json
   "type": "module",
   "dependencies": {
     "bcryptjs": "^2.4.3",

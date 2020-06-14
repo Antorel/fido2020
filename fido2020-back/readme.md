@@ -29,6 +29,10 @@ DB_HOST=localhost         # specify the database host (defaults to localhost)
 DB_PORT=3306              # specify the database port (defaults to 3306)
 DB_DIALECT=mysql          # select the database dialect (mysql (default), mariadb, sqlite, postgresql, mssql)
 DB_RECONNECT_TIMEOUT=2000 # time between db reconnection attempts (defaults to 2000)
+<<<<<<< HEAD
+=======
+DB_SESS_HOST=localhost    # specify the session database host (defaults to localhost)
+>>>>>>> 482effbc564c8648d0a3c093ff43f7ba42e4c281
 ```
 
 Download libraries with `npm install` and start the server with `npm start`.

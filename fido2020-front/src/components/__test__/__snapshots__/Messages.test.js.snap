@@ -30,7 +30,11 @@ exports[`matches the previous snapshot 1`] = `
           <time
             dateTime={"2020-05-24T14:01:41.000Z"}
           >
+<<<<<<< HEAD
             May 24, 2020 10:01 AM
+=======
+            May 24, 2020 8:01 PM
+>>>>>>> 482effbc564c8648d0a3c093ff43f7ba42e4c281
           </time>
         </small>
       </time>
